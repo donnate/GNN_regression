@@ -6,30 +6,26 @@ import networkx as nx
 import sys, os
 
 
-sys.path.append('/scratch/midway3/cdonnat/GNN_regression')
-
+#sys.path.append('/scratch/midway3/cdonnat/GNN/GNN_regression')
+sys.path.append('~/Documents/GNN_regression')
 from functions import *
-
-
-# Define the grid dimension
-# Define the grid dimension
-
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--namefile', type=str)
 parser.add_argument('--seed', type=int)
-parser.add_argument('--k', type=int, default=30)
-parser.add_argument('--n_step_predict', type=int, default=15)
+parser.add_argument('--dim_grid', type=int)
+parser.add_argument('--n_nodes_x', type=int, default=30)
 args = parser.parse_args()
 
 
-k =  args.k
-namefile =  "experiment_" + args.namefile + "_seed_" + str(args.seed) + ".csv"
+np.random.seed(args.seed)
+n_nodes_x =  args.n_nodes_x
+namefile =  "experiment_" + args.namefile + "_seed_" + str(args.seed) +  "dim_grid" + str(args.dim_grid) +".csv"
 # Create the grid graph
-G = nx.grid_graph(dim=[k, k])
+G = nx.grid_graph(dim=[n_nodes_x] * args.dim_grid)
 # Create the meshgrid for the coordinates
-x = np.linspace(-1, 1, k)
-y = np.linspace(-1, 1, k)
+x = np.linspace(-1, 1, n_nodes_x)
+y = np.linspace(-1, 1, n_nodes_x)
 x, y = np.meshgrid(x, y)
 # Reshape and combine the coordinates
 X_pos = np.hstack([x.reshape([-1, 1]), y.reshape([-1, 1])])
@@ -37,7 +33,7 @@ X_pos = np.hstack([x.reshape([-1, 1]), y.reshape([-1, 1])])
 
 
 
-pos = {(i % k, i // k): [X_pos[i, 0], X_pos[i, 1]] for i in np.arange(X_pos.shape[0])}
+pos = {(i % n_nodes_x, i // n_nodes_x): [X_pos[i, 0], X_pos[i, 1]] for i in np.arange(X_pos.shape[0])}
 n = nx.number_of_nodes(G)
 A = nx.adjacency_matrix(G)
 A = A.todense() + np.eye(n)
@@ -89,7 +85,7 @@ for k in np.arange(1, 10):
                         test_mse = (np.square(Y_pred - new_Y)).mean()
                         res_temp += [float(test_mse)]
                     results[it, :] = res_temp
-                    pd.DataFrame(results).to_csv("/results/" + namefile)
+                    pd.DataFrame(results).to_csv("results/" + namefile)
                     it += 1
                     
                     Y_pred2 = T_k @ Y
@@ -115,7 +111,7 @@ for k in np.arange(1, 10):
                         test_mse = (np.square(Y_pred2 - new_Y)).mean()
                         res_temp += [float(test_mse)]
                     results[it, :] = res_temp
-                    pd.DataFrame(results).to_csv("/results/" + namefile)
+                    pd.DataFrame(results).to_csv("results/" + namefile)
                     it += 1
                     #print(it)
 
