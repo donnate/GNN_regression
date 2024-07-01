@@ -6,14 +6,15 @@ import networkx as nx
 import sys, os
 
 
-#sys.path.append('/scratch/midway3/cdonnat/GNN/GNN_regression')
-sys.path.append('~/Documents/GNN_regression')
+sys.path.append('/scratch/midway3/cdonnat/GNN/GNN_regression')
+#sys.path.append('~/Documents/GNN_regression')
 from functions import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--namefile', type=str)
 parser.add_argument('--seed', type=int)
 parser.add_argument('--dim_grid', type=int)
+parser.add_argument('--r', type=int, default=4)
 parser.add_argument('--n_nodes_x', type=int, default=30)
 args = parser.parse_args()
 
@@ -21,6 +22,7 @@ args = parser.parse_args()
 np.random.seed(args.seed)
 n_nodes_x =  args.n_nodes_x
 namefile =  "experiment_" + args.namefile + "_seed_" + str(args.seed) +  "dim_grid" + str(args.dim_grid) +".csv"
+r = args.r
 # Create the grid graph
 G = nx.grid_graph(dim=[n_nodes_x] * args.dim_grid)
 # Create the meshgrid for the coordinates
@@ -46,7 +48,7 @@ T = D2 @ A
 L = nx.laplacian_matrix(G)
 
 nb_exp = 1
-results = np.zeros(( 8 *  6 *  3 * 10, 27))
+results = np.zeros(( 8 *  6 *  3 * 10, 30))
 it = 0
 S_k = np.eye(n)
 T_k = np.eye(n)
@@ -60,7 +62,7 @@ for k in np.arange(1, 10):
                 print([k, scale, M, alpha])
                 for exp in np.arange(nb_exp):
                     ###
-                    f, X =  smooth_sobolev_function(L, r=4, alpha=alpha, M=M) 
+                    f, X =  smooth_sobolev_function(L, r=args.r, alpha=alpha, M=M) 
                     Y = np.random.normal(f, scale=scale)
                     Y_pred = S_k @ Y
                     ### Fit a GNN to predict what Y is:
@@ -79,7 +81,7 @@ for k in np.arange(1, 10):
             
                     #pred = model(data.x, data.edge_index)
                     train_acc = np.mean(np.square(Y_pred - Y)) 
-                    res_temp = [exp, 0, k,  scale, M, alpha, float(train_acc)]
+                    res_temp = [exp, 0, k,  r, n_nodes_x, args.dim_grid, scale, M, alpha, float(train_acc)]
                     for u in range(20):
                         new_Y = np.random.normal(f, scale=scale)
                         test_mse = (np.square(Y_pred - new_Y)).mean()
@@ -105,7 +107,7 @@ for k in np.arange(1, 10):
             
                     #pred = model(data.x, data.edge_index)
                     train_acc = np.mean(np.square(Y_pred2 - Y)) 
-                    res_temp = [exp, 1,  k,  scale, M, alpha, float(train_acc)]
+                    res_temp = [exp, 1,  k, r, n_nodes_x, args.dim_grid,  scale, M, alpha, float(train_acc)]
                     for u in range(20):
                         new_Y = np.random.normal(f, scale=scale)
                         test_mse = (np.square(Y_pred2 - new_Y)).mean()
