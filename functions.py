@@ -65,3 +65,54 @@ class GCN(torch.nn.Module):
           return test_mse, pred
 
 
+def generate_mixture_of_gaussians(X, p, K, limit_mu = 5, limit_sigma_high = 3, limit_sigma_low= 0.5):
+    # Define the 2D Gaussian function
+    dim_ambiant = X.shape[1]
+    def gaussian(X, mu, sigma):
+        dim_ambiant = X.shape[1]
+        log_exp = 0
+        for i in np.arange(dim_ambiant):
+            log_exp += (X[:,i] - mu[i])**2 / (2 * sigma[i]**2)
+            
+        return np.exp(-log_exp)
+
+    Z = np.zeros((X.shape[0], p))
+    for i in np.arange(p):
+        ### generate mixure weights:
+        w = np.random.uniform(low=0., high=1, size=K)
+        w = w/np.sum(w)
+        z_temp = np.zeros((X.shape[0],))
+        for k in np.arange(K):
+            mu = np.array(np.random.uniform(low=-limit_mu, high=limit_mu, size=dim_ambiant))
+            sigma = np.array(np.random.uniform(low=limit_sigma_low, high=limit_sigma_high, size=dim_ambiant))
+            z_temp += w[i] * gaussian(X, mu, sigma)
+        Z[:,i] = z_temp
+    return(Z)
+
+
+def generate_mixture_of_cosines(X, p, K, low_freq=0.4, high_freq=5):
+    # Define the 2D Gaussian function
+    dim_ambiant = X.shape[1]
+    def sine_function(X, frequency):
+        dim_ambiant = X.shape[1]
+        res = 1.
+        for i in np.arange(dim_ambiant):
+            u = np.random.uniform(size=1)
+            #print([i,u])
+            if u >0.5:
+                res *= np.cos(frequency[i] * X[:,i])
+            else:
+                res *= np.sin(frequency[i] * X[:,i])
+        return(res)
+
+    Z = np.zeros((X.shape[0], p))
+    for i in np.arange(p):
+        ### generate mixure weights:
+        w = np.random.uniform(low=0., high=1, size=K)
+        w = w/np.sum(w)
+        z_temp = np.zeros((X.shape[0],))
+        for k in np.arange(K):
+            frequency = np.array(np.random.uniform(low=low_freq, high=high_freq, size=dim_ambiant))
+            z_temp += w[i] * sine_function(X, frequency)
+        Z[:,i] = z_temp
+    return(Z)
