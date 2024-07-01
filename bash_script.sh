@@ -5,7 +5,7 @@
 #SBATCH --array=1-50
 #SBATCH --time=2:00:00
 #SBATCH --partition=cdonnat
-#SBATCH --mem=3G
+#SBATCH --mem=1G
 #SBATCH --account=pi-cdonnat
 #SBATCH --qos=cdonnat
 #SBATCH --mail-type=ALL
