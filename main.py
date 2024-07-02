@@ -21,6 +21,7 @@ parser.add_argument('--m_pa', type=int, default=1)
 #parser.add_argument('--r', type=int, default=2)
 parser.add_argument('--p_sbm_between', type=float, default=0.1)
 parser.add_argument('--graph_type', type=str, default="grid")
+
 args = parser.parse_args()
 
 
@@ -83,7 +84,8 @@ T = D2 @ A_tilde
 
 L = nx.laplacian_matrix(G)
 
-nb_exp = 10
+nb_exp = 1
+nb_exp = 1
 scale_grid = [0.01, 0.5,  1.0, 5.0]
 M_grid = [1]
 alpha_grid = [0.01, 0.1, 0.5, 1]
@@ -108,7 +110,7 @@ T_k = np.eye(n)
 for k in np.arange(2, 10):
     S_k = S @ S_k
     T_k = T @ T_k
-    B_k = (T != 0).astype(int)
+    B_k = (T_k != 0).astype(int)
     inv_degree = np.diag(1./ np.sum(B_k, 1))
     B_k = inv_degree @ B_k
 
