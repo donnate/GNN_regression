@@ -89,7 +89,7 @@ M_grid = [1]
 alpha_grid = [0.01, 0.1, 0.5, 1]
 r_grid = [2, 4, 10]
 
-results = pd.DataFrame(np.zeros(( 3 * nb_exp *  len(r_grid) *  len(scale_grid) *  len(M_grid) * len(alpha_grid), 36)),
+results = pd.DataFrame(np.zeros(( 3 * 10* nb_exp *  len(r_grid) *  len(scale_grid) *  len(M_grid) * len(alpha_grid), 36)),
                        columns=['exp_id', 
                                 'method', 
                                 'graph_type',
@@ -105,7 +105,7 @@ it = 0
 S_k = np.eye(n)
 T_k = np.eye(n)
 
-for k in np.arange(1, 10):
+for k in np.arange(2, 10):
     S_k = S @ S_k
     T_k = T @ T_k
     B_k = (T != 0).astype(int)
