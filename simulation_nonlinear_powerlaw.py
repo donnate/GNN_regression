@@ -12,11 +12,15 @@ import torch.nn.functional as F
 from torch_geometric.data import Data
 from scipy.sparse import coo_matrix
 
-sys.path.append('~/Documents/GNN_regression')
+#sys.path.append('~/Documents/GNN_regression')
+sys.path.append('/scratch/midway3/cdonnat/GNN_regression/GNN_regression/GNN_regression')
 from functions_alt import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--add_node', required=True,  type=int)  # Positional argument
+parser.add_argument('--noise', required=True,  type=float) 
+parser.add_argument('--non_linear', required=True,  type=int) 
+parser.add_argument('--seed', required=True,  type=int) 
 args = parser.parse_args()
 
 beta_matrix = np.array([[-0.1, 0.1],[-1., 1.],
@@ -38,8 +42,9 @@ lambda_seq = [0.001, 0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 1., 2.5, 5., 10, 25, 50,
 sparse_seq = [0., 0.05, 0.1, 0.2, 0.5, 0.75,  0.95]
 graph_type = "Power Law"
                         
-for exp in np.arange(20):
-    for scale_noise  in [0.1, 1., 2., 5., 10.]:
+for it_exp, exp in enumerate([args.seed]):
+    np.random.seed(exp)
+    for scale_noise  in [args.noise]:
         for it, sparsity in enumerate(sparse_seq):
             for index_beta in np.arange(8):
                 ##### Define signal on graph
@@ -81,7 +86,8 @@ for exp in np.arange(20):
                 beta = beta_matrix[index_beta,:]
                 Z = np.random.normal(scale = scale_noise, size=n_nodes_x)
                 y_true = 2 * np.cos(U.dot(beta))
-                y_true = relu(y_true) + 0.5
+                if args.non_linear == 1:
+                    y_true = relu(y_true) + 0.5
                 Y = y_true + Z
 
                 edge_index = adjacency_to_edge_index(A)
@@ -250,8 +256,8 @@ for exp in np.arange(20):
                                                         "smoothness_max", "smoothness_cor",
                                                         "Method", "L","fold", "Error", "Prediction",
                                                         "Bias", "Variance"])
-                    df_train.to_csv("~/Downloads/new_results2_non_linearity_train_simu_PL_topo_" + str(args.add_node) + "_prediction.csv")
-                    df_test.to_csv("~/Downloads/new_results2_non_linearity_test_simu_PL_topo_" + str(args.add_node) + "_prediction.csv")
+                    df_train.to_csv("results/new_results2_non_linearity_train_simu_PL_topo_NL" + str(args.non_linear) + "_seed" +  str(args.seed)+  "_add_nodes"+str(args.add_node)  + "_prediction.csv")
+                    df_test.to_csv("results/new_results2_non_linearity_test_simu_PL_topo_NL" + str(args.non_linear) + "_seed" +  str(args.seed)+  "_add_nodes"+str(args.add_node)  + "_prediction.csv")
 
 
                 
