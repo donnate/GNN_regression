@@ -22,5 +22,5 @@ cd $SCRATCH/$USER/GNN_regression/GNN_regression
 module load python
 source activate py311
 # Run one experiment  to create the dataset
-python3 simulation_latent_non_linearity.R --add_node $1 --noise $2 --seed ${SLURM_ARRAY_TASK_ID}
+python3 simulation_latent_non_linearity.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
 
