@@ -12,11 +12,14 @@ import torch.nn.functional as F
 from torch_geometric.data import Data
 from scipy.sparse import coo_matrix
 
-sys.path.append('~/Documents/GNN_regression')
+#sys.path.append('~/Documents/GNN_regression')
+sys.path.append('/scratch/midway3/cdonnat/GNN_regression/GNN_regression/GNN_regression')
 from functions_alt import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--add_node', required=True,  type=int)  # Positional argument
+parser.add_argument('--noise', required=True,  type=float) 
+parser.add_argument('--seed', required=True,  type=int) 
 args = parser.parse_args()
 
 beta_matrix = np.array([[-0.1, 0.1],[-1., 1.],
@@ -39,8 +42,9 @@ sparse_seq = [0., 0.05, 0.1, 0.2, 0.5, 0.75,  0.95]
 
 
                         
-for exp in np.arange(20):
-    for scale_noise  in [0.1, 1., 2., 5., 10.]:
+for it_exp, exp in enumerate([args.seed]):
+    np.random.seed(exp)
+    for scale_noise  in [args.noise]:
         for sparsity in sparse_seq:
             for index_beta in np.arange(8):
                 ##### Define signal on graph
@@ -258,8 +262,8 @@ for exp in np.arange(20):
                                                         "smoothness_max", "smoothness_cor",
                                                         "Method", "L","fold", "Error", "Prediction",
                                                         "Bias", "Variance"])
-                    df_train.to_csv("~/Downloads/new_results2_non_linearity_train_simu_latent_topo_" + str(args.add_node) + "_prediction.csv")
-                    df_test.to_csv("~/Downloads/new_results2_non_linearity_test_simu_latent_topo_" + str(args.add_node) + "_prediction.csv")
+                    df_train.to_csv("results/new_results2_non_linearity_train_simu_latent_topo_" + str(args.add_node) + "_" +  str(args.seed)+ "_prediction.csv")
+                    df_test.to_csv("results/new_results2_non_linearity_test_simu_latent_topo_" + str(args.add_node)+ "_" +  str(args.seed) + "_prediction.csv")
 
 
                 
