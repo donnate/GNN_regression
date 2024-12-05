@@ -19,7 +19,9 @@ from functions_alt import *
 parser = argparse.ArgumentParser()
 parser.add_argument('--add_node', required=True,  type=int)  # Positional argument
 parser.add_argument('--noise', required=True,  type=float) 
+parser.add_argument('--non_linear', required=True,  type=int) 
 parser.add_argument('--seed', required=True,  type=int) 
+
 args = parser.parse_args()
 
 beta_matrix = np.array([[-0.1, 0.1],[-1., 1.],
@@ -93,7 +95,9 @@ for it_exp, exp in enumerate([args.seed]):
                 beta = beta_matrix[index_beta,:]
                 Z = np.random.normal(scale = scale_noise, size=n_nodes_x)
                 y_true = 2 * np.cos(U.dot(beta))
-                y_true = relu(y_true) + 0.5
+                if args.non_linear == 1:
+                    y_true = relu(y_true) + 0.5
+                
                 Y = y_true + Z
 
                 edge_index = adjacency_to_edge_index(A)
@@ -262,8 +266,8 @@ for it_exp, exp in enumerate([args.seed]):
                                                         "smoothness_max", "smoothness_cor",
                                                         "Method", "L","fold", "Error", "Prediction",
                                                         "Bias", "Variance"])
-                    df_train.to_csv("results/new_results2_non_linearity_train_simu_latent_topo_" + str(args.add_node) + "_" +  str(args.seed)+ "_prediction.csv")
-                    df_test.to_csv("results/new_results2_non_linearity_test_simu_latent_topo_" + str(args.add_node)+ "_" +  str(args.seed) + "_prediction.csv")
+                    df_train.to_csv("results/new_results2_non_linearity_train_simu_latent_topo_NL" + str(args.non_linear) + "_seed" +  str(args.seed)+  "_add_nodes"+str(args.add_node)  + "_prediction.csv")
+                    df_test.to_csv("results/new_results2_non_linearity_test_simu_latent_topo_NL" + str(args.non_linear) + "_seed" +   str(args.seed)+  "_add_nodes"+str(args.add_node)  + "_prediction.csv")
 
 
                 
