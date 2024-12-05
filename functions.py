@@ -5,11 +5,11 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, SAGEConv
 from networkx import grid_graph
 import scipy as sc
 
-from torch_geometric.nn import GCNConv
+from torch_geometric.nn import GCNConv, SGConv
 from torch_geometric.data import Data
 from torch_geometric.utils import from_scipy_sparse_matrix, to_undirected
 
@@ -37,17 +37,62 @@ class GCN(torch.nn.Module):
     def __init__(self, input_dim, nb_convolutions=1, output_dim=1):
         super().__init__()
         torch.manual_seed(1234567)
-        self.conv1 = GCNConv(input_dim, output_dim)
-        #self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+        self.conv = torch.nn.ModuleList()
+        
+        if nb_convolutions == 1:
+            self.conv.append(GCNConv(input_dim, output_dim))
+        else:
+            for i in range(nb_convolutions - 1):
+                self.conv.append(GCNConv(input_dim, input_dim))
+            self.conv.append(GCNConv(input_dim, output_dim))
 
     def forward(self, x, edge_index):
-        x = self.conv1(x, edge_index)
-        #x = x.relu()
-        #x = F.dropout(x, p=0.5, training=self.training)
-        #x = self.conv2(x, edge_index)
+        nb_convolutions = len(self.conv)
+        for i in range(nb_convolutions - 1):
+            x = self.conv[i](x, edge_index)
+            x = F.dropout(x, p=0.5, training=self.training)
+        x = self.conv[nb_convolutions - 1](x, edge_index)
+        return x
+
+    def train_data(self, data, train_mask, criterion):
+        optimizer = torch.optim.Adam(self.parameters(), lr=0.01, weight_decay=5e-4)
+        self.train()
+        optimizer.zero_grad()  # Clear gradients.
+        out = self.forward(data.x, data.edge_index)  # Perform a single forward pass.
+        loss = criterion(out[train_mask], data.y[train_mask])  # Compute the loss solely based on the training nodes.
+        loss.backward()  # Derive gradients.
+        optimizer.step()  # Update parameters based on gradients.
+        return loss
+
+    def test_data(self, data, f, scale, criterion):
+        new_Y = np.random.normal(f, scale=scale)
+        self.eval()
+        pred = self.forward(data.x, data.edge_index)
+        test_mse = criterion(pred, torch.from_numpy(new_Y).float().to(pred.device))  # Check against ground-truth labels.
+        return test_mse, pred
+
+class Sage(torch.nn.Module):
+    def __init__(self, input_dim, nb_convolutions=1, output_dim=1):
+        super().__init__()
+        torch.manual_seed(1234567)
+        if nb_convolutions == 1:
+            self.conv = [SAGEConv(input_dim, output_dim)]
+        else:
+            self.conv = []
+            for i in np.arange(nb_convolutions-1):
+                self.conv.append(SAGEConv(input_dim, input_dim))
+            self.conv += [SAGEConv(input_dim, output_dim)]
+            #self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+
+    def forward(self, x, edge_index):
+        nb_convolutions = len(self.conv)
+        for i in np.arange(nb_convolutions-1):
+            x = self.conv[i](x, edge_index)
+            x = F.dropout(x, p=0.5, training=self.training)
+        x = self.conv[nb_convolutions-1](x, edge_index)
         return x
         
-    def train_data(self, data, train_mask):
+    def train_data(self, data, train_mask, criterion):
           optimizer = torch.optim.Adam(self.parameters(), lr=0.01, weight_decay=5e-4)
           self.train()
           optimizer.zero_grad()  # Clear gradients.
@@ -57,12 +102,57 @@ class GCN(torch.nn.Module):
           optimizer.step()  # Update parameters based on gradients.
           return loss
 
-    def test_data(self, data, f, scale):
+    def test_data(self, data, f, scale, criterion):
           new_Y = np.random.normal(f, scale=scale)
           self.eval()
           pred = self.forward(data.x, data.edge_index)
           test_mse = criterion(pred, torch.from_numpy(new_Y).float())  # Check against ground-truth labels.
           return test_mse, pred
+    
+
+
+    class SGN(torch.nn.Module):
+        def __init__(self, input_dim, nb_convolutions=1, output_dim=1):
+            super().__init__()
+            torch.manual_seed(1234567)
+            if nb_convolutions == 1:
+                self.conv = [SGConv(input_dim, output_dim)]
+            else:
+                self.conv = []
+                for i in np.arange(nb_convolutions-1):
+                    self.conv.append(SGConv(input_dim, input_dim, K=1))
+                self.conv += [SGConv(input_dim, output_dim, K=1)]
+            #self.conv2 = GCNConv(hidden_channels, dataset.num_classes)
+
+        def forward(self, x, edge_index):
+            nb_convolutions = len(self.conv)
+            if nb_convolutions == 1:
+                x = self.conv[0](x, edge_index)
+            else:
+                for i in np.arange(nb_convolutions-1):
+                    x = self.conv[i](x, edge_index)
+            #x = x.relu()
+            #x = F.dropout(x, p=0.5, training=self.training)
+            #x = self.conv2(x, edge_index)
+            return x
+            
+        def train_data(self, data, train_mask, criterion):
+            optimizer = torch.optim.Adam(self.parameters(), lr=0.01, weight_decay=5e-4)
+            self.train()
+            optimizer.zero_grad()  # Clear gradients.
+            out = self.forward(data.x, data.edge_index)  # Perform a single forward pass.
+            loss = criterion(out[train_mask], data.y[train_mask])  # Compute the loss solely based on the training nodes.
+            loss.backward()  # Derive gradients.
+            optimizer.step()  # Update parameters based on gradients.
+            return loss
+
+        def test_data(self, data, f, scale, criterion):
+            new_Y = np.random.normal(f, scale=scale)
+            self.eval()
+            pred = self.forward(data.x, data.edge_index)
+            test_mse = criterion(pred, torch.from_numpy(new_Y).float())  # Check against ground-truth labels.
+            return test_mse, pred
+    
 
 
 def generate_mixture_of_gaussians(X, p, K, limit_mu = 5, limit_sigma_high = 3, limit_sigma_low= 0.5):
