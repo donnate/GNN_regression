@@ -1,13 +1,13 @@
 #!/bin/bash
 
-#SBATCH --job-name=array
-#SBATCH --output=experiments/logs/array_%A_%a.out
-#SBATCH --error=experiments/logs/array_%A_%a.err
-#SBATCH --array=1-12
+#SBATCH --job-name=array_latent
+#SBATCH --output=experiments/logs/array_latent_%A_%a.out
+#SBATCH --error=experiments/logs/array_latent_%A_%a.err
+#SBATCH --array=1-20
 #SBATCH --time=12:00:00
-#SBATCH --partition=cdonnat
+#SBATCH --partition=caslake
 #SBATCH --ntasks=1
-#SBATCH --mem=20G
+#SBATCH --mem=5G
 #SBATCH --account=pi-cdonnat
 
 # Print the task id.
