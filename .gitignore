@@ -1,6 +1,7 @@
 results/*
 __pycache__/*
 .ipynb_checkpoints/*
+experiments/*
 *.ipynb
 *.png
 .DS_Store/*

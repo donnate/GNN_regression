@@ -22,11 +22,11 @@ cd $SCRATCH/$USER/GNN_regression/GNN_regression
 module load python
 source activate py311
 # Run one experiment  to create the dataset
-if if [ "$4" == "Barbell" ]
+if [ "$4" == "Barbell" ]
 then
     python3 simulation_nonlinear_barbell_graph.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
 else
-    if if [ "$4" == "Tree" ]
+    if [ "$4" == "Tree" ]
     then
         python3 simulation_nonlinear_tree.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
     else
