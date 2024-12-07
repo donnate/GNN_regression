@@ -242,7 +242,7 @@ class SAGEGCN(torch.nn.Module):
         return x
 
 
-def fit_GNN(data, GNN_type="GCN", L=1):
+def fit_GNN(data, data_GT, GNN_type="GCN", L=1):
     #### Train a neural network
     if GNN_type == "GCN":
         model = GCN(1, 1, 1, L)
@@ -276,10 +276,15 @@ def fit_GNN(data, GNN_type="GCN", L=1):
         test_pred = out[data.test_mask]
         test_labels = data.y[data.test_mask]
         train_pred = out[data.train_mask]
+
+        out_GT = model(data_GT.x, data_GT.edge_index)  # Predictions for all nodes
+        # Extract predictions for test nodes
+        test_pred_GT = out_GT[data_GT.test_mask]
+        train_pred_GT = out_GT[data_GT.train_mask]
         # For regression: Compute Mean Squared Error (MSE)
         mse_loss = torch.nn.functional.mse_loss(test_pred, test_labels)
         print(f"Test MSE: {mse_loss:.4f}")
-        return(train_pred, test_pred)
+        return(train_pred, test_pred, train_pred_GT, test_pred_GT)
     
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
