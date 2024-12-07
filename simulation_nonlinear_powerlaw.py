@@ -171,9 +171,8 @@ for it_exp, exp in enumerate([args.seed]):
                                         np.square(np.array(y_true)[test_index] - np.array(pred_test_gt)).mean(),
                                         np.square(np.array(pred_test_gt) - np.array(pred_test)).mean()]]
                     #####
-                    train_pred, test_pred = fit_GNN(data, GNN_type="GCN", L=L)
-                    train_pred_gt, test_pred_gt = fit_GNN(data_GT, GNN_type="GCN", L=L)
-                
+                    train_pred, test_pred, train_pred_gt, test_pred_gt = fit_GNN(data, data_GT, GNN_type="GCN", L=L)
+                   
                     results_train += [[ graph_type, scale_noise, sparsity, beta[1],  exp, smoothness,smoothness2,smoothness_max, smoothness_cor,  
                                         "GNN: Learned", L, fold, np.square(train_pred.numpy() - y_true[train_index]).mean(), 
                                         np.square(train_pred.numpy() - Y[train_index]).mean(),
@@ -186,8 +185,8 @@ for it_exp, exp in enumerate([args.seed]):
                                         np.square(np.array(y_true)[test_index] - test_pred_gt.numpy()).mean(),
                                         np.square(test_pred_gt.numpy() - test_pred.numpy()).mean()]]
                     
-                    train_pred, test_pred = fit_GNN(data, GNN_type="SAGEGCN", L=L)
-                    train_pred_gt, test_pred_gt = fit_GNN(data_GT, GNN_type="SAGEGCN", L=L)
+                    train_pred, test_pred, train_pred_gt, test_pred_gt = fit_GNN(data, data_GT, GNN_type="SAGEGCN", L=L)
+                   
 
                     results_train += [[ graph_type, scale_noise, sparsity, beta[1],  exp, smoothness,smoothness2,smoothness_max, smoothness_cor,  
                                         "GNN-SAGE: Learned", L, fold, np.square(train_pred.numpy() - y_true[train_index]).mean(), 
