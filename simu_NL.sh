@@ -24,12 +24,12 @@ source activate py311
 # Run one experiment  to create the dataset
 if if [ "$4" == "Barbell" ]
 then
-    python3 simulation_nonlinear_barbell_graph.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
+    python3 src/simulation_nonlinear_barbell_graph.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
 else
     if if [ "$4" == "Tree" ]
     then
-        python3 simulation_nonlinear_tree.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
+        python3 src/simulation_nonlinear_tree.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
     else
-        python3 simulation_nonlinear_powlaw.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
+        python3 src/simulation_nonlinear_powlaw.py --add_node $1 --noise $2 --non_linear $3 --seed ${SLURM_ARRAY_TASK_ID}
  fi
 fi
