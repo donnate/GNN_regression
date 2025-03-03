@@ -5,3 +5,6 @@ __pycache__/*
 *.png
 .DS_Store/*
 results_cloud/*
+notebooks/*
+results/*
+archive/*
