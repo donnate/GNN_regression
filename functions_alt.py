@@ -197,12 +197,15 @@ class GCN(torch.nn.Module):
 
 
     def forward(self, x, edge_index):
+        residual = x
         if len(self.layers) > 1:
             for i, conv in enumerate(self.layers):
                 x = conv(x, edge_index)
                 if i < len(self.layers) - 1:  # No activation on the output layer
                     x = F.relu(x)
                     x = F.dropout(x, p=0.5, training=self.training)
+                    #x = x + residual
+                    #residual = x
         else:
             for i, conv in enumerate(self.layers):
                 x = conv(x, edge_index)
@@ -231,11 +234,14 @@ class SAGEGCN(torch.nn.Module):
 
     def forward(self, x, edge_index):
         if len(self.layers) > 1:
+            residual = x
             for i, conv in enumerate(self.layers):
                 x = conv(x, edge_index)
                 if i < len(self.layers) - 1:  # No activation on the output layer
                     x = F.relu(x)
                     x = F.dropout(x, p=0.5, training=self.training)
+                    #x = x + residual
+                    #residual = x
         else:
             for i, conv in enumerate(self.layers):
                 x = conv(x, edge_index)
@@ -245,9 +251,9 @@ class SAGEGCN(torch.nn.Module):
 def fit_GNN(data, data_GT, GNN_type="GCN", L=1):
     #### Train a neural network
     if GNN_type == "GCN":
-        model = GCN(1, 1, 1, L)
+        model = GCN(1, 8, 1, L)
     else:
-        model = SAGEGCN(1, 1, 1, L)
+        model = SAGEGCN(1, 8, 1, L)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01, weight_decay=5e-4)
     criterion = torch.nn.MSELoss()
 
