@@ -289,8 +289,8 @@ for it_exp, exp in enumerate([args.seed]):
                                                         "smoothness_max", "smoothness_cor",
                                                         "Method", "L","fold", "Error", "Prediction",
                                                         "Bias", "Variance"])
-                    df_train.to_csv("results/new_results2_non_linearity_train_simu_latent_topo_NL" + str(args.non_linear) + "_seed" +  str(args.seed)+  "_add_nodes"+str(args.add_node)  + graph_type  + "_prediction.csv")
-                    df_test.to_csv("results/new_results2_non_linearity_test_simu_latent_topo_NL" + str(args.non_linear) + "_seed" +   str(args.seed)+  "_add_nodes"+str(args.add_node)  + graph_type  + "_prediction.csv")
+                    df_train.to_csv("results/final_results/simu_NL" + str(args.non_linear) + "_seed" +  str(args.seed)+  "_add_nodes"+str(args.add_node) + "_"  + graph_type  + "_prediction.csv")
+                    df_test.to_csv("results/final_results/simu_NL" + str(args.non_linear) + "_seed" +   str(args.seed)+  "_add_nodes"+str(args.add_node) + "_"  + graph_type  + "_prediction.csv")
 
 
                 
